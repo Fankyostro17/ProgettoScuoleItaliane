@@ -43,16 +43,7 @@ public class Server extends Thread {
                 out.print("Insert Code -> ");
                 String str = in.readLine();
                 if (str.contains("")) {
-                    String msgTmp = str.substring(0, 1);
-                    for (int i = 1; i < str.length(); i++) {
-                        msgTmp += str.substring(i, i+1);
-                        if (!str.substring(i+1, i+2).equalsIgnoreCase("")) {
-                            i++;
-                        } else {
-                            //msgTmp = msgTmp.substring(0, msgTmp.length()-1);
-                        }
-                    }
-                    str = msgTmp;
+                    str = changeCode(str);
                 }
                 if (str.equals("END") || str.equals("STOP")) {
                     break;
@@ -78,6 +69,19 @@ public class Server extends Thread {
             System.err.println("Accept failed");
             System.exit(1);
         }
+    }
+
+    private String changeCode(String str){
+        String msgTmp = str.substring(0, 1);
+        for (int i = 1; i < str.length(); i++) {
+            String charTmp = str.substring(i, i+1);
+            if (charTmp.equalsIgnoreCase("")) {
+                msgTmp = msgTmp.substring(0, msgTmp.length()-1);
+            } else {
+                msgTmp += charTmp;
+            }
+        }
+        return msgTmp;
     }
 
     private String codes(){
