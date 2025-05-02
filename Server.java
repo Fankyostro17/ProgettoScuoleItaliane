@@ -29,18 +29,15 @@ public class Server extends Thread {
     @Override
     public void run() {
         try {
-            System.out.println("Connection accepted: " + clientSocket);
+            System.out.println("Connection accepted: " + getClientSocket());
             readFile();
-            InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
-            in = new BufferedReader(isr);
-            OutputStreamWriter osw = new OutputStreamWriter(clientSocket.getOutputStream());
-            BufferedWriter bw = new BufferedWriter(osw);
-            out = new PrintWriter(bw, true);
-            out.println("Benvenuto nel Progetto Scuole Italiane!");
-            out.println(codes());
-            out.flush();
+            setIn(new BufferedReader(new InputStreamReader(getClientSocket().getInputStream())));
+            setOut(new PrintWriter(new BufferedWriter(new OutputStreamWriter(getClientSocket().getOutputStream())), true));
+            getOut().println("Benvenuto nel Progetto Scuole Italiane!");
+            getOut().println(codes());
+            getOut().flush();
             while (true) {
-                out.print("Insert Code -> ");
+                getOut().print("Insert Code -> ");
                 String str = in.readLine();
                 if (str.contains("")) {
                     str = changeCode(str);
@@ -50,24 +47,31 @@ public class Server extends Thread {
                 }
                 try {
                     if (str.substring(0, 10).equals("GET-COMUNE")) {
-                        for (LinkedList<String> list : getArchive().values()) {
-                            if (list.getFirst().contains(str.substring(13))) {
-                                out.println(list.toString().replace(";", ", ")
-                                .replace("[", "").replace("]", ""));
-                            }
-                        }
+                        comand("GET-COMUNE", str, 0);
+                    }
+                    if (str.substring(0, 13).equals("GET-PROVINCIA")) {
+                        comand("GET-PROVINCIA", str, 1);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             System.out.println("Server closing...");
-            out.close();
-            in.close();
-            clientSocket.close();
+            getOut().close();
+            getIn().close();
+            getClientSocket().close();
         } catch (IOException e) {
             System.err.println("Accept failed");
             System.exit(1);
+        }
+    }
+
+    private void comand(String comand, String str, int index){
+        for (LinkedList<String> list : getArchive().values()) {
+            if (str.substring(comand.length()+2).contains(list.get(index))) {
+                getOut().println(list.toString().replace(";", ", ")
+                .replace("[", "").replace("]", "") + "\n");
+            }
         }
     }
 
