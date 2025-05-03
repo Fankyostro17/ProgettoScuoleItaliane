@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -5,11 +6,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
 public class Server extends Thread {
+
     private BufferedReader in;
     private PrintWriter out;
     private Socket clientSocket;
@@ -33,11 +36,15 @@ public class Server extends Thread {
             readFile();
             setIn(new BufferedReader(new InputStreamReader(getClientSocket().getInputStream())));
             setOut(new PrintWriter(new BufferedWriter(new OutputStreamWriter(getClientSocket().getOutputStream())), true));
-            getOut().println("Benvenuto nel Progetto Scuole Italiane!");
-            getOut().println(codes());
+
+            StringBuilder msg = new StringBuilder();
+            msg.append("Benvenuto nel Progetto Scuole Italiane!\n");
+            msg.append(codes());
+            msg.append("\nInsert Code -> ");
+            getOut().println(msg.toString());
             getOut().flush();
+
             while (true) {
-                getOut().print("Insert Code -> ");
                 String str = in.readLine();
                 if (str.contains("")) {
                     str = changeCode(str);
@@ -46,16 +53,17 @@ public class Server extends Thread {
                     break;
                 }
                 try {
-                    if (str.substring(0, 10).equals("GET-COMUNE")) {
-                        comand("GET-COMUNE", str, 0);
-                    }
-                    if (str.substring(0, 13).equals("GET-PROVINCIA")) {
-                        comand("GET-PROVINCIA", str, 1);
-                    }
+                    StringBuilder msgOut = new StringBuilder();
+                    msgOut.append(elencoComandi(str));
+                    msgOut.append(codes());
+                    msgOut.append("\nInsert Code -> ");
+                    getOut().println(msgOut.toString());
+                    getOut().flush();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+
             System.out.println("Server closing...");
             getOut().close();
             getIn().close();
@@ -66,21 +74,64 @@ public class Server extends Thread {
         }
     }
 
-    private void comand(String comand, String str, int index){
-        for (LinkedList<String> list : getArchive().values()) {
-            if (str.substring(comand.length()+2).contains(list.get(index))) {
-                getOut().println(list.toString().replace(";", ", ")
-                .replace("[", "").replace("]", "") + "\n");
-            }
+    private String elencoComandi(String str) {
+        String msg = "";
+        if (str.startsWith("GET-COMUNE")) {
+            msg += comand("GET-COMUNE", str, 0);
+        } else if (str.startsWith("GET-PROVINCIA")) {
+            msg += comand("GET-PROVINCIA", str, 1);
+        } else if (str.startsWith("GET-REGIONE")) {
+            msg += comand("GET-REGIONE", str, 2);
+        } else if (str.startsWith("GET-CODICE")) {
+            msg += comand("GET-CODICE", str, 3);
+        } else if (str.startsWith("GET-ISTITUTO")) {
+            msg += comand("GET-ISTITUTO", str, 4);
+        } else if (str.startsWith("GET-TIPOLOGIA-ISTITUTO")) {
+            msg += comand("GET-TIPOLOGIA-ISTITUTO", str, 5);
+        } else if (str.startsWith("GET-INDIRIZZO")) {
+            msg += comand("GET-INDIRIZZO", str, 6);
+        } else if (str.startsWith("GET-CODICE-POSTALE")) {
+            msg += comand("GET-CODICE-POSTALE", str, 7);
+        } else if (str.startsWith("GET-TELEFONO")) {
+            msg += comand("GET-TELEFONO", str, 8);
+        } else if (str.startsWith("GET-FAX")) {
+            msg += comand("GET-FAX", str, 9);
+        } else if (str.startsWith("GET-EMAIL")) {
+            msg += comand("GET-EMAIL", str, 10);
+        } else if (str.startsWith("GET-EMAIL-PEC")) {
+            msg += comand("GET-EMAIL-PEC", str, 11);
+        } else if (str.startsWith("GET-DIREZIONE")) {
+            msg += comand("GET-DIREZIONE", str, 12);
+        } else if (str.startsWith("GET-STATALE")) {
+            msg += comand("GET-STATALE", str, 13);
+        } else if (str.startsWith("GET-PARITARIA")) {
+            msg += comand("GET-PARITARIA", str, 14);
+        } else {
+            msg += "Comando non valido.";
         }
+        return msg;
     }
 
-    private String changeCode(String str){
+    private String comand(String comand, String str, int index) {
+        String msg = "";
+        if (!(str.charAt(comand.length() + 1) == ' ')) {
+            str = str.substring(0, comand.length() + 1) + " " + str.substring((comand.length() + 1), str.length());
+        }
+        for (LinkedList<String> list : getArchive().values()) {
+            if (str.substring(comand.length() + 1).contains(list.get(index))) {
+                msg += list.toString().replace(";", ", ")
+                        .replace("[", "").replace("]", "") + "\n";
+            }
+        }
+        return msg;
+    }
+
+    private String changeCode(String str) {
         String msgTmp = str.substring(0, 1);
         for (int i = 1; i < str.length(); i++) {
-            String charTmp = str.substring(i, i+1);
+            String charTmp = str.substring(i, i + 1);
             if (charTmp.equalsIgnoreCase("")) {
-                msgTmp = msgTmp.substring(0, msgTmp.length()-1);
+                msgTmp = msgTmp.substring(0, msgTmp.length() - 1);
             } else {
                 msgTmp += charTmp;
             }
@@ -88,8 +139,8 @@ public class Server extends Thread {
         return msgTmp;
     }
 
-    private String codes(){
-        return "Codici possibili:\nEND,\tSTOP,\tGET-COMUNE,\tGET-PROVINCIA,\tGET-REGIONE,\tGET-CODICE,\tGET-ISTITUTO,\tGET-TIPOLOGIA-ISTITUTO,\tGET-INDIRIZZO,\tGET-CODICE-POSTALE,\tGET-TELEFONO,\tGET-FAX,\tGET-EMAIL,\tGET-EMAIL-PEC,\tGET-DIREZIONE,\tGET-STATALE,\tGET-PARITARIA";
+    private String codes() {
+        return "Codici possibili:\tEND,\tSTOP,\tGET-COMUNE,\tGET-PROVINCIA,\tGET-REGIONE,\tGET-CODICE,\tGET-ISTITUTO,\tGET-TIPOLOGIA-ISTITUTO,\tGET-INDIRIZZO,\tGET-CODICE-POSTALE,\tGET-TELEFONO,\tGET-FAX,\tGET-EMAIL,\tGET-EMAIL-PEC,\tGET-DIREZIONE,\tGET-STATALE,\tGET-PARITARIA";
     }
 
     private void readFile() {
@@ -103,11 +154,11 @@ public class Server extends Thread {
                 data = line.split(";");
                 LinkedList<String> listaDati = new LinkedList<String>();
                 for (String valore : data) {
-                    listaDati.add(valore.replace("E'", "È")
-                    .replace("O'", "Ò")
-                    .replace("U'", "Ù")
-                    .replace("A'", "À")
-                    .replace("I'", "Ì"));
+                    listaDati.add(valore/*.replace("E'", "È")
+                            .replace("O'", "Ò")
+                            .replace("U'", "Ù")
+                            .replace("A'", "À")
+                            .replace("I'", "Ì")*/);
                 }
                 getArchive().put((String) listaDati.get(3), listaDati);
                 line = br.readLine();
@@ -155,5 +206,21 @@ public class Server extends Thread {
 
     public void setTitles(LinkedList<String> titles) {
         this.titles = titles;
+    }
+
+    public static void main(String[] args) throws IOException {
+        int PORT = 1717;
+
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Server started ");
+            System.out.println("Server Socket: " + serverSocket);
+            do {
+                Socket clientSocket = serverSocket.accept();
+                Server server = new Server(clientSocket);
+                server.start();
+            } while (true);
+        } catch (Exception ex) {
+            System.out.println("error");
+        }
     }
 }
