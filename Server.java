@@ -1,25 +1,22 @@
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
-public class Server extends Thread {
+public class Server implements Runnable {
 
     private BufferedReader in;
     private PrintWriter out;
     private Socket clientSocket;
     private TreeMap<String, LinkedList<String>> archive;
     private LinkedList<String> titles;
+    private String udpMessage;
 
     final static String PATH = "Anagrafe-delle-scuole-italiane.csv";
+    final static int PORT_TCP = 1717;
+    final static int PORT_UDP = 1717;
 
     public Server(Socket clientSocket) {
         setIn(null);
@@ -29,8 +26,35 @@ public class Server extends Thread {
         setTitles(new LinkedList<String>());
     }
 
+    public Server(String udpMessage) {
+        setIn(null);
+        setOut(null);
+        setUdpMessage(udpMessage);
+        setArchive(new TreeMap<String, LinkedList<String>>());
+        setTitles(new LinkedList<String>());
+    }
+
     @Override
     public void run() {
+        if (clientSocket != null) {
+            TCP_Connection();
+        } else if (udpMessage != null) {
+            UDP_Connection();
+        }
+    }
+
+    private void UDP_Connection() {
+        String response = "";
+        if (getUdpMessage().equalsIgnoreCase("END")) {
+            response = "Chiusura del Client";
+        } else if (getUdpMessage().equalsIgnoreCase("STOP")) {
+            response = "Chiusura del Client e del Server";
+        } else {
+            response = elencoComandi(getUdpMessage());
+        }
+    }
+
+    private void TCP_Connection() {
         try {
             System.out.println("Connection accepted: " + getClientSocket());
             readFile();
@@ -140,7 +164,7 @@ public class Server extends Thread {
     }
 
     private String codes() {
-        return "Codici possibili:\tEND,\tSTOP,\tGET-COMUNE,\tGET-PROVINCIA,\tGET-REGIONE,\tGET-CODICE,\tGET-ISTITUTO,\tGET-TIPOLOGIA-ISTITUTO,\tGET-INDIRIZZO,\tGET-CODICE-POSTALE,\tGET-TELEFONO,\tGET-FAX,\tGET-EMAIL,\tGET-EMAIL-PEC,\tGET-DIREZIONE,\tGET-STATALE,\tGET-PARITARIA";
+        return "Codici possibili: END, STOP, GET-COMUNE, GET-PROVINCIA, GET-REGIONE, GET-CODICE, GET-ISTITUTO, GET-TIPOLOGIA-ISTITUTO, GET-INDIRIZZO, GET-CODICE-POSTALE, GET-TELEFONO, GET-FAX, GET-EMAIL, GET-EMAIL-PEC, GET-DIREZIONE, GET-STATALE, GET-PARITARIA";
     }
 
     private void readFile() {
@@ -209,18 +233,25 @@ public class Server extends Thread {
     }
 
     public static void main(String[] args) throws IOException {
-        int PORT = 1717;
-
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+        try (ServerSocket serverSocket = new ServerSocket(PORT_TCP)) {
             System.out.println("Server started ");
             System.out.println("Server Socket: " + serverSocket);
             do {
                 Socket clientSocket = serverSocket.accept();
                 Server server = new Server(clientSocket);
-                server.start();
+                Thread serverThread = new Thread(server);
+                serverThread.start();
             } while (true);
         } catch (Exception ex) {
             System.out.println("error");
         }
+    }
+
+    public String getUdpMessage() {
+        return udpMessage;
+    }
+
+    public void setUdpMessage(String udpMessage) {
+        this.udpMessage = udpMessage;
     }
 }
