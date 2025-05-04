@@ -324,10 +324,12 @@ class Server extends Thread {
             msg += comand("GET-EMAIL", str, 10);
         } else if (str.startsWith("GET-EMAIL-PEC")) {
             msg += comand("GET-EMAIL-PEC", str, 11);
+        } else if (str.startsWith("GET-SITE")) {
+            msg += comand("GET-SITE", str, 12);
         } else if (str.startsWith("GET-DIREZIONE")) {
-            msg += comand("GET-DIREZIONE", str, 12);
+            msg += comand("GET-DIREZIONE", str, 13);
         } else if (str.startsWith("GET-STATALE")) {
-            msg += comand("GET-STATALE", str, 13);
+            msg += comand("GET-STATALE", str, 14);
         } else if (str.startsWith("GET-PARITARIA")) {
             msg += comand("GET-PARITARIA", str, 14);
         } else {
@@ -339,14 +341,26 @@ class Server extends Thread {
     private String comand(String comand, String str, int index) {
         String msg = "";
         str = str.toUpperCase();
-        if (!(str.charAt(comand.length() + 1) == ' ')) {
-            str = str.substring(0, comand.length() + 1) + " " + str.substring((comand.length() + 1), str.length());
+        if (!comand.equalsIgnoreCase("GET-STATALE") && !comand.equalsIgnoreCase("GET-PARITARIA")) {
+            if (!(str.charAt(comand.length() + 1) == ' ')) {
+                str = str.substring(0, comand.length() + 1) + " " + str.substring((comand.length() + 1), str.length());
+            }
         }
         for (LinkedList<String> list : getArchive().values()) {
-            if (str.substring(comand.length() + 1).contains(list.get(index).toUpperCase())) {
+            if (comand.equalsIgnoreCase("GET-STATALE") && list.get(index).toUpperCase().equalsIgnoreCase("STATALE")) {
+                msg += list.toString().replace(";", ", ")
+                        .replace("[", "").replace("]", "") + "\n";
+            } else if (comand.equalsIgnoreCase("GET-PARITARIA") && list.get(index).toUpperCase().equalsIgnoreCase("PARITARIA")) {
                 msg += list.toString().replace(";", ", ")
                         .replace("[", "").replace("]", "") + "\n";
             }
+            if (!comand.equalsIgnoreCase("GET-STATALE") && !comand.equalsIgnoreCase("GET-PARITARIA")) {
+                if (str.substring(comand.length() + 1).contains(list.get(index).toUpperCase())) {
+                    msg += list.toString().replace(";", ", ")
+                            .replace("[", "").replace("]", "") + "\n";
+                }
+            }
+
         }
         return msg;
     }
@@ -365,7 +379,7 @@ class Server extends Thread {
     }
 
     private String codes() {
-        return "Codici possibili: END, STOP, GET-COMUNE, GET-PROVINCIA, GET-REGIONE, GET-CODICE, GET-ISTITUTO, GET-TIPOLOGIA-ISTITUTO, GET-INDIRIZZO, GET-CODICE-POSTALE, GET-TELEFONO, GET-FAX, GET-EMAIL, GET-EMAIL-PEC, GET-DIREZIONE, GET-STATALE, GET-PARITARIA";
+        return "Codici possibili: END, STOP, GET-COMUNE, GET-PROVINCIA, GET-REGIONE, GET-CODICE, GET-ISTITUTO, GET-TIPOLOGIA-ISTITUTO, GET-INDIRIZZO, GET-CODICE-POSTALE, GET-TELEFONO, GET-FAX, GET-EMAIL, GET-EMAIL-PEC, GET-SITE, GET-DIREZIONE, GET-STATALE, GET-PARITARIA";
     }
 
     public BufferedReader getIn() {
