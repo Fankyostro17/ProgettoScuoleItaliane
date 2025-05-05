@@ -128,7 +128,6 @@ public class ClientGUI extends JFrame implements Runnable {
                 }
                 appendText(line + "\n");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

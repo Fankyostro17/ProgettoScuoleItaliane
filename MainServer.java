@@ -39,11 +39,19 @@ class UDP_Server implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Connessione server UDP nella porta " + PORT_UDP);
-            Server server = new Server(getArchive(), getTitles());
-            server.start();
+            do {
+                DatagramSocket clientUDP_Socket = new DatagramSocket(Integer.parseInt("1771"));
+                byte[] datiRicevuti = new byte[1024];
+
+                DatagramPacket pacchettoRicevuto = new DatagramPacket(datiRicevuti, datiRicevuti.length);
+                clientUDP_Socket.receive(pacchettoRicevuto);
+                System.out.println("Connessione server UDP nella porta " + PORT_UDP);
+
+                Server server = new Server(getArchive(), getTitles(), pacchettoRicevuto, clientUDP_Socket);
+                server.start();
+            } while (true);
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -58,11 +66,7 @@ class UDP_Server implements Runnable {
                 data = line.split(";");
                 LinkedList<String> listaDati = new LinkedList<String>();
                 for (String valore : data) {
-                    listaDati.add(valore/*.replace("E'", "È")
-                            .replace("O'", "Ò")
-                            .replace("U'", "Ù")
-                            .replace("A'", "À")
-                            .replace("I'", "Ì")*/);
+                    listaDati.add(valore);
                 }
                 getArchive().put((String) listaDati.get(3), listaDati);
                 line = br.readLine();
@@ -112,8 +116,6 @@ class TCP_Server implements Runnable {
                 Socket clientSocket = serverSocket.accept();
                 Server server = new Server(clientSocket, getArchive(), getTitles());
                 server.start();
-                /*Thread serverThread = new Thread(server);
-                serverThread.start();*/
             } while (true);
         } catch (Exception ex) {
             System.out.println("error");
@@ -131,11 +133,7 @@ class TCP_Server implements Runnable {
                 data = line.split(";");
                 LinkedList<String> listaDati = new LinkedList<String>();
                 for (String valore : data) {
-                    listaDati.add(valore/*.replace("E'", "È")
-                            .replace("O'", "Ò")
-                            .replace("U'", "Ù")
-                            .replace("A'", "À")
-                            .replace("I'", "Ì")*/);
+                    listaDati.add(valore);
                 }
                 getArchive().put((String) listaDati.get(3), listaDati);
                 line = br.readLine();
@@ -169,6 +167,8 @@ class Server extends Thread {
     private Socket clientSocket;
     private TreeMap<String, LinkedList<String>> archive;
     private LinkedList<String> titles;
+    private DatagramPacket pacchettoRicevuto;
+    private DatagramSocket clientUDP_Socket;
 
     public Server(Socket clientSocket, TreeMap<String, LinkedList<String>> archive, LinkedList<String> titles) {
         setIn(null);
@@ -178,11 +178,13 @@ class Server extends Thread {
         setTitles(titles);
     }
 
-    public Server(TreeMap<String, LinkedList<String>> archive, LinkedList<String> titles) {
+    public Server(TreeMap<String, LinkedList<String>> archive, LinkedList<String> titles, DatagramPacket pacchettoRicevuto, DatagramSocket clientUDP_Socket) {
         setIn(null);
         setOut(null);
         setArchive(archive);
         setTitles(titles);
+        setPacchettoRicevuto(pacchettoRicevuto);
+        setClientUDP_Socket(clientUDP_Socket);
     }
 
     @Override
@@ -196,25 +198,19 @@ class Server extends Thread {
 
     private void UDP_Connection() {
         try {
-            DatagramSocket clientUDP_Socket = new DatagramSocket(Integer.parseInt("1771"));
-            byte[] datiRicevuti = new byte[1024];
             byte[] datiInviati;
-
-            DatagramPacket pacchettoRicevuto = new DatagramPacket(datiRicevuti, datiRicevuti.length);
-            clientUDP_Socket.receive(pacchettoRicevuto);
-            System.out.println("Connection UDP accepted");
+            String msg = "Benvenuto nel Progetto Scuole Italiane!\n" + codes() + "\nInsert Code -> ";
 
             InetAddress IP_Address = pacchettoRicevuto.getAddress();
             int clientPort = pacchettoRicevuto.getPort();
-            String msg = "Benvenuto nel Progetto Scuole Italiane!\n" + codes() + "\nInsert Code -> ";
 
             DatagramPacket pacchettoInviato = new DatagramPacket(msg.getBytes(), msg.getBytes().length, IP_Address, clientPort);
             clientUDP_Socket.send(pacchettoInviato);
 
             while (true) {
-                datiRicevuti = new byte[1024];
+                byte[] datiRicevuti = new byte[1024];
 
-                pacchettoRicevuto = new DatagramPacket(datiRicevuti, datiRicevuti.length);
+                DatagramPacket pacchettoRicevuto = new DatagramPacket(datiRicevuti, datiRicevuti.length);
                 clientUDP_Socket.receive(pacchettoRicevuto);
 
                 IP_Address = pacchettoRicevuto.getAddress();
@@ -396,6 +392,22 @@ class Server extends Thread {
 
     public void setOut(PrintWriter out) {
         this.out = out;
+    }
+
+    public DatagramPacket getPacchettoRicevuto() {
+        return pacchettoRicevuto;
+    }
+
+    public void setPacchettoRicevuto(DatagramPacket pacchettoRicevuto) {
+        this.pacchettoRicevuto = pacchettoRicevuto;
+    }
+
+    public DatagramSocket getClientUDP_Socket() {
+        return clientUDP_Socket;
+    }
+
+    public void setClientUDP_Socket(DatagramSocket clientUDP_Socket) {
+        this.clientUDP_Socket = clientUDP_Socket;
     }
 
     public Socket getClientSocket() {
