@@ -5,40 +5,48 @@ L’obiettivo principale di questo progetto è la realizzazione di un’applicaz
 Il progetto è stato migliorato con l’ausilio di diversi tipi di Client per garantire la diversità di accesso al server e ai dati, rendendolo versatile.
 
 ## Codes:
-END - Close Client
-STOP - Close Client and Server
-GET-COMUNE - Take information from a respective Municipality
-GET-PROVINCIA - Take information from a respective province
-GET-REGIONE - Take information from a respective region
-GET-CODICE - Take information from a respective code
-GET-ISTITUTO - Take information from a respective istitute
-GET-TIPOLOGIA-ISTITUTO - Take information from a respective type of istitute
-GET-INDIRIZZO - Take information from a respective address
-GET-CODICE-POSTALE - Take information from a respective postcode
-GET-TELEFONO - Take information from a respective telephone number
-GET-FAX - Take information from a respective FAX
-GET-EMAIL - Take information from a respective email
-GET-EMAIL-PEC - Take information from a respective PEC email
-GET-SITE - Take information from a respective web site
-GET-DIREZIONE - Take information from a respective main office
-GET-STATALE - get all state schools
-GET-PARITARIA - get all private schools
+- END - Chiude il client
+- STOP - Chiude il client e il server corrente
+- GET-COMUNE - Prende le informazioni di un rispettivo comune
+- GET-PROVINCIA - Prende le informazioni di una rispettiva provincia
+- GET-REGIONE - Prende le informazioni di una rispettiva regione
+- GET-CODICE - Prende le informazioni di un rispettivo codice
+- GET-ISTITUTO - Prende le informazioni di un rispettivo istituto
+- GET-TIPOLOGIA-ISTITUTO - Prende le informazioni di una rispettiva tipologia di istituti
+- GET-INDIRIZZO - Prende le informazioni di un rispettivo indirizzo
+- GET-CODICE-POSTALE - Prende le informazioni di un rispettivo codice postale
+- GET-TELEFONO - Prende le informazioni di un rispettivo numero di telefono
+- GET-FAX - Prende le informazioni di un rispettivo FAX
+- GET-EMAIL - Prende le informazioni di una rispettiva email
+- GET-EMAIL-PEC - Prende le informazioni di un rispettivo email PEC
+- GET-SITE - Prende le informazioni di un rispettivo sito web
+- GET-DIREZIONE - Prende le informazioni di una rispettiva direzione
+- GET-STATALE - Prende tutte le scuole statali
+- GET-PARITARIA - Prende tutte le scuole paritarie
 
-Writing the command, example -> GET-COMUNE: VENEZIA (exceptions -> END, STOP, GET-STATALE, GET-PARITARIA -> are written by themselves, example -> END)
+Scrittura del comando, esempio -> GET-COMUNE: VENEZIA (eccezioni -> END, STOP, GET-STATALE, GET-PARITARIA -> sono scritti da soli, esempio -> END).
 
-## Installation
-1. Open bash
-2. Navigate to the folder where you want to clone the project
-3. clone this repository:
-   ```bash
+## Scelte Progettuali
+1. I dati saranno inseriti all’interno di un TreeMap (che chiameremo ‘archive’), in modo da garantire la velocità, l’univocità dei dati attraverso i codici delle scuole come chiavi e i dati saranno inseriti all’interno di una LinkedList. I titoli saranno inseriti in una LinkedList (che chiameremo ‘titles’) per contenere tutti i titoli presenti; questa lista è efficace se ci sono inserimenti, rimozioni e ricerche.
+
+2. Lettura del file ‘Anagrafe-delle-scuole-italiane.csv’, la prima riga verrà inserita nei titles (ciclo for per Lista), mentre dalla seconda verranno inseriti nell’archive (ciclo while per Map). I dati verranno modificati per facilitare la ricerca, per esempio gli spazzi saranno massimo di 1.
+
+3. La ricerca dei dati sarà effettuata tramite il metodo contains(), in modo da ricercare qualcosa anche se non si inserisce l’intera parola.
+
+4. Ho voluto realizzare più client diversi in modo tale da emulare più connessioni con più dispositivi diversi.
+
+## Installazione
+1. Apri la bash
+2. Seleziona la cartella dove vuoi salvare il progetto
+3. Clona questa repository:
    git clone https://github.com/Fankyostro17/ProgettoScuoleItaliane.git
 
-4. Use Visual Studio Code or Intellij to open the progect
-5. Start server
-6. Start one of the Clients (or more)
+4. Usa Visual Studio Codce o IntelliJ per aprire il progetto
+5. Avvia il server
+6. Avvia uno dei client (o più di uno)
 
-## License
-Distributed under the GNU license. See LICENSE for details.
+## Licenza
+Distribuita sotto licenza GNU. Guarda LICENSE per più dettagli.
 
 ## Contatti
 Thomas Fanciullacci - thomas.fanciullacci@gmail.com
