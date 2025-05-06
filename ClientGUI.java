@@ -24,7 +24,7 @@ public class ClientGUI extends JFrame implements Runnable {
     public ClientGUI(String serverAddress) {
         setTitle("Client GUI");
         setSize(1000, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         setTextArea(new JTextArea());
